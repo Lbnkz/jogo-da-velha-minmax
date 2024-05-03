@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1714697271 source:c:\users\windows\documents\calculadora\main.cpp
+	<stdio.h>
+	<stdlib.h>
+	<limits.h>
+
