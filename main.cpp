@@ -1,179 +1,208 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
 
-// Função para converter o número em caractere para exibir no tabuleiro
 char converter(int numero) {
     char letra;
     switch(numero) {
-        case 1: letra = 'O';
-                break;
-        case 3: letra = 'X';
-                break;
-        default: letra = ' ';
+        case 1: letra = 'O'; break;
+        case 3: letra = 'X'; break;
+        default: letra = ' '; break;
     }
     return letra;
 }
 
-// Função para mostrar o tabuleiro
 void mostrarTabuleiro(int matriz[3][3]) {
-    printf("%c|%c|%c\n", converter(matriz[0][0]), converter(matriz[0][1]), converter(matriz[0][2]));
-    printf("-----\n");
-    printf("%c|%c|%c\n", converter(matriz[1][0]), converter(matriz[1][1]), converter(matriz[1][2]));
-    printf("-----\n");
-    printf("%c|%c|%c\n", converter(matriz[2][0]), converter(matriz[2][1]), converter(matriz[2][2]));
-}
-
-
-// Função para verificar se houve vitória para X ou O
-int verificaSeGanhou(int matriz[3][3], int jogador) {
-    // Verifica linhas
-    for(int i = 0; i < 3; i++) {
-        if(matriz[i][0] * matriz[i][1] * matriz[i][2] == jogador*jogador*jogador)
-            return 1; // Jogador ganhou
+    for (int i = 0; i < 3; i++) {
+        if (i > 0) printf("-----\n");
+        printf("%c|%c|%c\n", converter(matriz[i][0]), converter(matriz[i][1]), converter(matriz[i][2]));
     }
-    // Verifica colunas
-    for(int i = 0; i < 3; i++) {
-        if(matriz[0][i] * matriz[1][i] * matriz[2][i] == jogador*jogador*jogador)
-            return 1; // Jogador ganhou
-    }
-    // Verifica diagonais
-    if((matriz[0][0] * matriz[1][1] * matriz[2][2] == jogador*jogador*jogador) || (matriz[0][2] * matriz[1][1] * matriz[2][0] == jogador*jogador*jogador))
-        return 1; // Jogador ganhou
-
-    return 0; // Ninguém ganhou
 }
 
-// Função para verificar se uma posição está livre
-int verificaSeAPosicaoEstaLivre(int matriz[3][3], int linha, int coluna) {
-    return (matriz[linha][coluna] == 2); // Retorna 1 se a posição está livre, senão retorna 0
-}
-
-// Função para permitir que o usuário jogue
 void usuarioJoga(int matriz[3][3]) {
     int linha, coluna;
     do {
-        printf("Escolha a linha (1-3) e coluna (1-3) para jogar: ");
+        printf("Escolha linha e coluna (0-2): ");
         scanf("%d %d", &linha, &coluna);
-        linha--; // Ajuste para índice 0-based
-        coluna--; // Ajuste para índice 0-based
-
-        if (!verificaSeAPosicaoEstaLivre(matriz, linha, coluna)) {
-            printf("A posição escolhida já está ocupada. Escolha uma posição válida.\n");
-        }
-    } while (!verificaSeAPosicaoEstaLivre(matriz, linha, coluna));
-    matriz[linha][coluna] = 1; // Coloca um 'O' na posição escolhida
+    } while (linha < 0 || linha > 2 || coluna < 0 || coluna > 2 || matriz[linha][coluna] != 2);
+    matriz[linha][coluna] = 1; // O jogador sempre joga com 'O'
 }
 
-// Função que avalia a pontuação de um determinado estado do tabuleiro
-int avaliar(int matriz[3][3]) {
-    if (verificaSeGanhou(matriz, 3)) // X ganhou
-        return 10;
-    else if (verificaSeGanhou(matriz, 1)) // O ganhou
-        return -10;
-    return 0; // Empate
-}
-
-// Função que implementa o algoritmo Minimax
-int minimax(int matriz[3][3], int profundidade, int jogador) {
-    int pontuacao = avaliar(matriz);
-
-    // Se o jogo já acabou ou atingiu o limite de profundidade, retorna a pontuação
-    if (pontuacao == 10 || pontuacao == -10 || profundidade == 0) {
-        return pontuacao;
-    }
-
-    int melhorPontuacao = jogador == 3 ? INT_MIN : INT_MAX;
-
-    // Percorre todas as células do tabuleiro
-    for (int linha = 0; linha < 3; linha++) {
-        for (int coluna = 0; coluna < 3; coluna++) {
-            if (matriz[linha][coluna] == 2) { // Se a célula estiver vazia
-                // Faz uma jogada
-                matriz[linha][coluna] = jogador;
-
-                // Recursivamente chama o minimax para avaliar a pontuação desta jogada
-                int pontuacaoAtual = minimax(matriz, profundidade - 1, jogador == 3 ? 1 : 3);
-
-                // Desfaz a jogada
-                matriz[linha][coluna] = 2;
-
-                // Atualiza a melhor pontuação de acordo com o jogador atual
-                if (jogador == 3) { // Maximiza para X
-                    melhorPontuacao = melhorPontuacao > pontuacaoAtual ? melhorPontuacao : pontuacaoAtual;
-                } else { // Minimiza para O
-                    melhorPontuacao = melhorPontuacao < pontuacaoAtual ? melhorPontuacao : pontuacaoAtual;
-                }
-            }
+int verificaSeXGanhou(int matriz[3][3]) {
+    int produtos[8] = {1, 1, 1, 1, 1, 1, 1, 1}; // 3 linhas, 3 colunas, 2 diagonais
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            produtos[i] *= matriz[i][j]; // Linhas
+            produtos[3 + j] *= matriz[i][j]; // Colunas
+            if (i == j) produtos[6] *= matriz[i][j]; // Diagonal principal
+            if (i + j == 2) produtos[7] *= matriz[i][j]; // Diagonal secundária
         }
     }
-
-    return melhorPontuacao;
+    for (int i = 0; i < 8; i++) {
+        if (produtos[i] == 27) return 1; // 3 * 3 * 3 = 27, X ganhou
+    }
+    return 0;
 }
 
-// Função para permitir que o computador jogue usando o algoritmo Minimax
+int verificaSeOGanhou(int matriz[3][3]) {
+    int produtos[8] = {1, 1, 1, 1, 1, 1, 1, 1};
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            produtos[i] *= matriz[i][j];
+            produtos[3 + j] *= matriz[i][j];
+            if (i == j) produtos[6] *= matriz[i][j];
+            if (i + j == 2) produtos[7] *= matriz[i][j];
+        }
+    }
+    for (int i = 0; i < 8; i++) {
+        if (produtos[i] == 1) return 1; // 1 * 1 * 1 = 1, O ganhou
+    }
+    return 0;
+}
 void computadorJoga(int matriz[3][3]) {
-    int melhorMovimento = INT_MIN;
-    int linhaEscolhida = -1;
-    int colunaEscolhida = -1;
-
-    // Percorre todas as células do tabuleiro
-    for (int linha = 0; linha < 3; linha++) {
-        for (int coluna = 0; coluna < 3; coluna++) {
-            if (matriz[linha][coluna] == 2) { // Se a célula estiver vazia
-                // Faz uma jogada
-                matriz[linha][coluna] = 3;
-
-                // Chama o algoritmo Minimax para avaliar a pontuação desta jogada
-                int pontuacao = minimax(matriz, 10, 1);
-
-                // Desfaz a jogada
-                matriz[linha][coluna] = 2;
-
-                // Verifica se a pontuação desta jogada é melhor que a atual
-                if (pontuacao > melhorMovimento) {
-                    melhorMovimento = pontuacao;
-                    linhaEscolhida = linha;
-                    colunaEscolhida = coluna;
+    int linha, coluna;
+    // Verifica se o computador pode ganhar em alguma linha
+    for (linha = 0; linha < 3; linha++) {
+        int soma = 1; // Começa com 1 para multiplicação
+        for (coluna = 0; coluna < 3; coluna++) {
+            soma *= matriz[linha][coluna];
+        }
+        if (soma == 18) { // 2 * 3 * 3 = 18, a linha tem duas casas do computador e uma vazia
+            for (coluna = 0; coluna < 3; coluna++) {
+                if (matriz[linha][coluna] == 2) {
+                    matriz[linha][coluna] = 3; // Faz a jogada para ganhar
+                    return;
                 }
             }
         }
     }
-
-    // Realiza a melhor jogada encontrada pelo algoritmo Minimax
-    matriz[linhaEscolhida][colunaEscolhida] = 3;
-}
-
-// Função principal
-int main() {
-    int matriz[3][3] = {{2, 2, 2}, {2, 2, 2}, {2, 2, 2}}; // Matriz inicial com todas as posições livres
-    int jogadas = 0;
-
-    printf("Bem-vindo ao jogo da velha!\n");
-    mostrarTabuleiro(matriz);
-
-    while (jogadas < 9) { // Loop para repetir as jogadas até que não haja mais posições livres
-        usuarioJoga(matriz);
-        jogadas++;
-        mostrarTabuleiro(matriz);
-        if (verificaSeGanhou(matriz, 1)) {
-            printf("O jogador O ganhou!\n");
-            return 0;
+    // Verifica se o computador pode ganhar em alguma coluna
+    for (coluna = 0; coluna < 3; coluna++) {
+        int soma = 1;
+        for (linha = 0; linha < 3; linha++) {
+            soma *= matriz[linha][coluna];
         }
-        if (jogadas == 9) {
-            printf("O jogo empatou!\n");
-            return 0;
-        }
-
-        computadorJoga(matriz);
-        jogadas++;
-        system("cls");
-        mostrarTabuleiro(matriz);
-        if (verificaSeGanhou(matriz, 3)) {
-            printf("O jogador X ganhou!\n");
-            return 0;
+        if (soma == 18) {
+            for (linha = 0; linha < 3; linha++) {
+                if (matriz[linha][coluna] == 2) {
+                    matriz[linha][coluna] = 3;
+                    return;
+                }
+            }
         }
     }
+    // Verifica se o computador pode ganhar na diagonal principal
+    int somaDiagonalPrincipal = 1;
+    for (linha = 0; linha < 3; linha++) {
+        somaDiagonalPrincipal *= matriz[linha][linha];
+    }
+    if (somaDiagonalPrincipal == 18) {
+        for (linha = 0; linha < 3; linha++) {
+            if (matriz[linha][linha] == 2) {
+                matriz[linha][linha] = 3;
+                return;
+            }
+        }
+    }
+    // Verifica se o computador pode ganhar na diagonal secundária
+    int somaDiagonalSecundaria = 1;
+    for (linha = 0; linha < 3; linha++) {
+        somaDiagonalSecundaria *= matriz[linha][2 - linha];
+    }
+    if (somaDiagonalSecundaria == 18) {
+        for (linha = 0; linha < 3; linha++) {
+            if (matriz[linha][2 - linha] == 2) {
+                matriz[linha][2 - linha] = 3;
+                return;
+            }
+        }
+    }
+    // Se não puder ganhar, verifica se pode bloquear o jogador 'O'
+    // Verifica se o jogador 'O' pode ganhar em alguma linha
+    for (linha = 0; linha < 3; linha++) {
+        int soma = 1;
+        for (coluna = 0; coluna < 3; coluna++) {
+            soma *= matriz[linha][coluna];
+        }
+        if (soma == 4) { // 1 * 1 * 1 = 1, a linha tem duas casas do jogador 'O' e uma vazia
+            for (coluna = 0; coluna < 3; coluna++) {
+                if (matriz[linha][coluna] == 2) {
+                    matriz[linha][coluna] = 3; // Bloqueia a jogada do jogador 'O'
+                    return;
+                }
+            }
+        }
+    }
+    // Verifica se o jogador 'O' pode ganhar em alguma coluna
+    for (coluna = 0; coluna < 3; coluna++) {
+        int soma = 1;
+        for (linha = 0; linha < 3; linha++) {
+            soma *= matriz[linha][coluna];
+        }
+        if (soma == 4) {
+            for (linha = 0; linha < 3; linha++) {
+                if (matriz[linha][coluna] == 2) {
+                    matriz[linha][coluna] = 3;
+                    return;
+                }
+            }
+        }
+    }
+    // Verifica se o jogador 'O' pode ganhar na diagonal principal
+    int somaDiagonalPrincipalO = 1;
+    for (linha = 0; linha < 3; linha++) {
+        somaDiagonalPrincipalO *= matriz[linha][linha];
+    }
+    if (somaDiagonalPrincipalO == 4) {
+        for (linha = 0; linha < 3; linha++) {
+            if (matriz[linha][linha] == 2) {
+                matriz[linha][linha] = 3;
+                return;
+            }
+        }
+    }
+    // Verifica se o jogador 'O' pode ganhar na diagonal secundária
+    int somaDiagonalSecundariaO = 1;
+    for (linha = 0; linha < 3; linha++) {
+        somaDiagonalSecundariaO *= matriz[linha][2 - linha];
+    }
+    if (somaDiagonalSecundariaO == 4) {
+        for (linha = 0; linha < 3; linha++) {
+            if (matriz[linha][2 - linha] == 2) {
+                matriz[linha][2 - linha] = 3;
+                return;
+            }
+        }
+    }
+    // Se não puder ganhar nem bloquear, joga em uma posição aleatória
+    do {
+        linha = rand() % 3;
+        coluna = rand() % 3;
+    } while (matriz[linha][coluna] != 2);
+    matriz[linha][coluna] = 3;
+}
 
+
+int verificaSeTemVitoria(int matriz[3][3]) {
+    if (verificaSeXGanhou(matriz)) return 3;
+    if (verificaSeOGanhou(matriz)) return 1;
+    return 2; // Jogo continua
+}
+
+int main() {
+    int matriz[3][3] = {{2, 2, 2}, {2, 2, 2}, {2, 2, 2}};
+    int resultado = 2;
+    for (int jogada = 0; jogada < 9 && resultado == 2; jogada++) {
+        mostrarTabuleiro(matriz);
+        usuarioJoga(matriz);
+        resultado = verificaSeTemVitoria(matriz);
+        if (resultado != 2) break;
+        computadorJoga(matriz); // Implementar lógica do computador
+        mostrarTabuleiro(matriz);
+        resultado = verificaSeTemVitoria(matriz);
+        if (resultado != 2) break;
+    }
+    if (resultado == 1) printf("O ganhou!\n");
+    else if (resultado == 3) printf("X ganhou!\n");
+    else printf("Empate!\n");
     return 0;
 }
