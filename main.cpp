@@ -123,7 +123,7 @@ void computadorJoga(int matriz[3][3]) {
         for (coluna = 0; coluna < 3; coluna++) {
             soma *= matriz[linha][coluna];
         }
-        if (soma == 3) { // 1 * 1 * 1 = 1, a linha tem duas casas do jogador 'O' e uma vazia
+        if (soma == 2) { // 1 * 2 * 1 = 2, a linha tem duas casas do jogador 'O' e uma vazia
             for (coluna = 0; coluna < 3; coluna++) {
                 if (matriz[linha][coluna] == 2) {
                     matriz[linha][coluna] = 3; // Bloqueia a jogada do jogador 'O'
@@ -138,7 +138,7 @@ void computadorJoga(int matriz[3][3]) {
         for (linha = 0; linha < 3; linha++) {
             soma *= matriz[linha][coluna];
         }
-        if (soma == 3) {
+        if (soma == 2) {
             for (linha = 0; linha < 3; linha++) {
                 if (matriz[linha][coluna] == 2) {
                     matriz[linha][coluna] = 3;
@@ -152,7 +152,7 @@ void computadorJoga(int matriz[3][3]) {
     for (linha = 0; linha < 3; linha++) {
         somaDiagonalPrincipalO *= matriz[linha][linha];
     }
-    if (somaDiagonalPrincipalO == 3) {
+    if (somaDiagonalPrincipalO == 2) {
         for (linha = 0; linha < 3; linha++) {
             if (matriz[linha][linha] == 2) {
                 matriz[linha][linha] = 3;
@@ -165,7 +165,7 @@ void computadorJoga(int matriz[3][3]) {
     for (linha = 0; linha < 3; linha++) {
         somaDiagonalSecundariaO *= matriz[linha][2 - linha];
     }
-    if (somaDiagonalSecundariaO == 3) {
+    if (somaDiagonalSecundariaO == 2) {
         for (linha = 0; linha < 3; linha++) {
             if (matriz[linha][2 - linha] == 2) {
                 matriz[linha][2 - linha] = 3;
