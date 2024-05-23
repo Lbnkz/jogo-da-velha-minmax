@@ -273,6 +273,9 @@ int main()
 {
     int matriz[3][3] = {{2, 2, 2}, {2, 2, 2}, {2, 2, 2}};
     int resultado = 2;
+
+    printf("Bem vindo ao Jogo da Velha Inteligente, voce sera a (O)!\n");
+
     for (int jogada = 0; jogada < 9 && resultado == 2; jogada++)
     {
         mostrarTabuleiro(matriz);
@@ -288,17 +291,17 @@ int main()
     };
     if (resultado == 1)
     {
-        printf("O ganhou!\n");
+        printf("O ganhou!\n\n");
         mostrarTabuleiro(matriz);
     }
     else if (resultado == 3)
     {
-        printf("X ganhou!\n");
+        printf("X ganhou!\n\n");
         mostrarTabuleiro(matriz);
     }
     else
     {
-        printf("Empate!\n");
+        printf("Empate!\n\n");
         mostrarTabuleiro(matriz);
     }
 }
