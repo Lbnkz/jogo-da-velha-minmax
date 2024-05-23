@@ -23,6 +23,11 @@ void usuarioJoga(int matriz[3][3]) {
     do {
         printf("Escolha linha e coluna (0-2): ");
         scanf("%d %d", &linha, &coluna);
+        if (linha < 0 || linha > 2 || coluna < 0 || coluna > 2) {
+            printf("Posição inválida! Escolha uma linha e coluna entre 0 e 2.\n");
+        } else if (matriz[linha][coluna] != 2) {
+            printf("Posição já ocupada! Escolha outra posição.\n");
+        }
     } while (linha < 0 || linha > 2 || coluna < 0 || coluna > 2 || matriz[linha][coluna] != 2);
     matriz[linha][coluna] = 1; // O jogador sempre joga com 'O'
 }
@@ -185,7 +190,16 @@ void computadorJoga(int matriz[3][3]) {
 int verificaSeTemVitoria(int matriz[3][3]) {
     if (verificaSeXGanhou(matriz)) return 3;
     if (verificaSeOGanhou(matriz)) return 1;
-    return 2; // Jogo continua
+
+    // Verifica se há posições livres no tabuleiro
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (matriz[i][j] == 2) {
+                return 2; // Jogo continua
+            }
+        }
+    }
+    return 0; // Empate
 }
 
 int main() {
@@ -194,12 +208,12 @@ int main() {
     for (int jogada = 0; jogada < 9 && resultado == 2; jogada++) {
         mostrarTabuleiro(matriz);
         usuarioJoga(matriz);
-        system("cls");
+        system("clear");
         resultado = verificaSeTemVitoria(matriz);
         if (resultado != 2) break;
         computadorJoga(matriz);
         mostrarTabuleiro(matriz);
-        system("cls");
+        system("clear");
         resultado = verificaSeTemVitoria(matriz);
         if (resultado != 2) break;
     }
